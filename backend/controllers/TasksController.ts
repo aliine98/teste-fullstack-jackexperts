@@ -100,3 +100,19 @@ export async function updateTask(req: Request, res: Response) {
         res.status(500).json({ error: 'server', message: 'Erro ao atualizar tarefa', details: error });
     }
 }
+
+//DELETE /delete-task/:id
+export async function deleteTask(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+        const [rows] = (await pool.execute('SELECT * FROM tasks WHERE id = ?', [id])) as RowDataPacket[];
+        if (rows.length === 0) {
+            res.status(404).json({ error: 'task', message: 'Id incorreto' });
+            return;
+        }
+        await pool.query('DELETE FROM tasks WHERE id = ?', [id]);
+        res.status(200).json({ message: 'Tarefa deletada' });
+    } catch (error) {
+        res.status(500).json({ error: 'server', message: 'Erro ao deletar tarefa', details: error });
+    }
+}
