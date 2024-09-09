@@ -27,7 +27,7 @@ export async function register(req: Request, res: Response) {
         await pool.query('INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)', [id, username, email, password]);
         res.status(201).json({ id, username, email });
     } catch (error) {
-        res.status(500).json({ error: 'server', message: 'Erro ao cadastrar usuário' });
+        res.status(500).json({ error: 'server', message: 'Erro ao cadastrar usuário', details: error });
     }
 }
 
@@ -58,6 +58,6 @@ export async function login(req: Request, res: Response) {
         const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || '', { expiresIn: '1h' });
         res.status(200).json({ token });
     } catch (error) {
-        res.status(500).json({ error: 'server', message: 'Erro ao fazer login' });
+        res.status(500).json({ error: 'server', message: 'Erro ao fazer login', details: error });
     }
 }

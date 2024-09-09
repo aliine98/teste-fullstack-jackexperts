@@ -26,7 +26,7 @@ export async function getTasks(req: Request, res: Response) {
         }
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ error: 'server', message: 'Erro ao buscar tarefas' });
+        res.status(500).json({ error: 'server', message: 'Erro ao buscar tarefas', details: error });
     }
 }
 
@@ -54,6 +54,23 @@ export async function addNewTask(req: Request, res: Response) {
         ]);
         res.status(201).json({ id, title, description });
     } catch (error) {
-        res.status(500).json({ error });
+        res.status(500).json({ error: 'server', message: 'Erro ao criar tarefa', details: error });
+    }
+}
+
+//PATCH /change-status/:id
+export async function changeTaskStatus(req: Request, res: Response) {
+    const { id } = req.params;
+    const { status } = req.body;
+    try {
+        const [rows] = (await pool.execute('SELECT * FROM tasks WHERE id = ?', [id])) as RowDataPacket[];
+        if (rows.length === 0) {
+            res.status(404).json({ error: 'task', message: 'Id incorreto' });
+            return;
+        }
+        await pool.query('UPDATE tasks SET status = ? WHERE id = ?', [status, id]);
+        res.status(200).json({ id, status });
+    } catch (error) {
+        res.status(500).json({ error: 'server', message: 'Erro ao atualizar tarefa', details: error });
     }
 }
