@@ -29,3 +29,31 @@ export async function getTasks(req: Request, res: Response) {
         res.status(500).json({ error: 'server', message: 'Erro ao buscar tarefas' });
     }
 }
+
+//POST /new-task
+export async function addNewTask(req: Request, res: Response) {
+    const { error, data } = Task.safeParse(req.body);
+    if (error) {
+        res.status(400).json(
+            error.issues.map(issue => {
+                return { error: issue.path.join(', '), message: issue.message };
+            })
+        );
+        return;
+    }
+    const id = crypto.randomUUID();
+    const { title, description, status } = data;
+    const { id: user_id } = req.body.user;
+    try {
+        await pool.query('INSERT INTO tasks (id, user_id, title, description, status) VALUES (?, ?, ?, ?, ?)', [
+            id,
+            user_id,
+            title,
+            description,
+            status,
+        ]);
+        res.status(201).json({ id, title, description });
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+}
