@@ -1,10 +1,8 @@
 import { z } from 'zod';
 
-const Task = z.object({
+export const Task = z.object({
     id: z.string().uuid(),
-    title: z.string(),
+    title: z.string().min(1, 'Título não pode ser vazio'),
     description: z.string(),
     status: z.enum(['incomplete', 'complete']),
 });
-
-export type Task = z.infer<typeof Task>;
