@@ -1,4 +1,4 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config';
 
-export const client = mysql.createPool(process.env.MYSQL_URI || '');
+export const pool = mysql.createPool(process.env.MYSQL_URI || '');
