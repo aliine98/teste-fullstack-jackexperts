@@ -74,3 +74,29 @@ export async function changeTaskStatus(req: Request, res: Response) {
         res.status(500).json({ error: 'server', message: 'Erro ao atualizar tarefa', details: error });
     }
 }
+
+//PATCH /update-task/:id
+export async function updateTask(req: Request, res: Response) {
+    const { id } = req.params;
+    const { error, data } = Task.safeParse(req.body);
+    if (error) {
+        res.status(400).json(
+            error.issues.map(issue => {
+                return { error: issue.path.join(', '), message: issue.message };
+            })
+        );
+        return;
+    }
+    const { title, description } = data;
+    try {
+        const [rows] = (await pool.execute('SELECT * FROM tasks WHERE id = ?', [id])) as RowDataPacket[];
+        if (rows.length === 0) {
+            res.status(404).json({ error: 'task', message: 'Id incorreto' });
+            return;
+        }
+        await pool.query('UPDATE tasks SET title = ?, description = ? WHERE id = ?', [title, description, id]);
+        res.status(200).json({ id, title, description });
+    } catch (error) {
+        res.status(500).json({ error: 'server', message: 'Erro ao atualizar tarefa', details: error });
+    }
+}
